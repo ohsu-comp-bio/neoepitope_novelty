@@ -75,7 +75,7 @@ def makeBlastpDB(makeblastdb, fasta, outputdir, title):
 		outputdir: directory to which database will be written
 		title: name of database
 		
-		No return value.
+		No return value
 	'''
 	subprocess.call([makeblastdb, "-in", fasta, "-input_type", "fasta", "-dbtype", "prot", 
 					"-title", outputdir+"/"+title, "-out", outputdir+"/"+title])
