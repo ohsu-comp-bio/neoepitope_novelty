@@ -202,3 +202,8 @@ if __name__ == '__main__':
 	run_blast(fasta_path, humanDB, args.blastp, args.outdir, args.sample, "human")
 	run_blast(fasta_path, bacterialDB, args.blastp, args.outdir, args.sample, "bacterial")
 	run_blast(fasta_path, viralDB, args.blastp, args.outdir, args.sample, "viral")
+	
+	# Process blast data and save to dictionaries
+	hum_dict = process_blast(outdir+"/"+sample+".human.blast.out", "human", blosum)
+	bac_dict = process_blast(outdir+"/"+sample+".bacterial.blast.out", "bacterial", blosum)
+	vir_dict = process_blast(outdir+"/"+sample+".viral.blast.out", "viral", blosum)
