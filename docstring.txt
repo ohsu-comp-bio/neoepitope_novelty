@@ -1,0 +1,27 @@
+Steps:
+
+1) Download required software:
+
+- BLAST+ (v2.4.0+)
+- NetMHCpan (v2.8)
+- Python (v2.7+)
+- Python libraries: BioPython (v1.70)
+
+
+2) Obtain and process required files:
+
+a) Download and unzip Ensembl's human peptide fasta, release 88, available at:
+ftp://ftp.ensembl.org/pub/release-88/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz
+
+b) Download and unzip Refseq's nonredundant bacterial peptide fasta set:
+ftp://ftp.ncbi.nlm.nih.gov/refseq/release/bacteria/bacteria.nonredundant_protein.*.protein.faa.gz
+Note: our code works for release #83
+Concatenate all the bacterial fasta files into one combined, bacterial peptide fasta file
+
+c) Download and unzip Refseq's viral peptide fasta set:
+ftp://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.*.protein.faa.gz
+Note: our code works for release #83
+Concatenate the viral fasta files into one combined, viral peptide fasta file
+
+
+3) Run prepare_prereqs.py ONCE from within the main neoepitope_novelty directory
