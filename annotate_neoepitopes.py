@@ -163,6 +163,54 @@ def process_blast(blast_results, type, matrix):
 	
 	return blast_dict
 	
+	
+def add_affinities(dict, netMHCpan, allele, outputdir, name, type):
+	''' Adds MHC binding affinities for top blast result peptides to blast dictionary
+	
+		dict: blast results dictionary
+		netMHCpan: path to netMHCpan executable
+		allele: HLA allele
+		outputdir: path to output directory in which to write netMHCpan-associate files
+		name: sample name to distinguish file (string)
+		type: blast type - human, bacterial, or viral (string)
+		
+		Return value: dictionary
+	'''
+	# Obtain peptide sequences
+	mhc_peps = outputdir + "/" + name + "." + type + ".mhc.peps"
+	with open(mhc_peps, "w") as fh:
+	for key in dict:
+		if type == "human":
+			seq = dict[key][3]
+		else:
+			seq = dict[key][2]
+		fh.write(seq + "\n")
+	
+	# Run netMHCpan
+	mhc_out = outputdir + "/" + name + "." + type + ".mhc.out"
+	subprocess.call([netMHCpan, "-a", allele, "-inptype", "1", "-p", "-xls", "-xlsfile", mhc_out, mhc_peps])
+	
+	# Process netMHCpan results
+	affinity_dict = {}
+	with open(mhc_out, "r") as fh:
+		for line in fh:
+			if line[0] == "0":
+				line = line.strip("\n").split("\t")
+				pep = line[2]
+				nM = line[5]
+				affinity_dict[pep] = nM
+	
+	# Add affinities to dictionary
+	for key in dict:
+		if type == "human":
+			seq = dict[key][3]
+		else:
+			seq = dict[key][2]
+		affinity = affinity_dict[seq]
+		dict[key].append(affinity)
+	
+	return dict
+		
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -177,6 +225,9 @@ if __name__ == '__main__':
         )
     parser.add_argument('-s', '--sample', type=str, required=True,
             help='sample name'
+        )
+    parser.add_argument('-a', '--allele', type=str, required=True,
+            help='HLA allele (format HLA-A02:01)'
         )
     parser.add_argument('-p', '--blastp', type=str, required=True,
             help='path to blastp executable'
@@ -207,3 +258,8 @@ if __name__ == '__main__':
 	hum_dict = process_blast(outdir+"/"+sample+".human.blast.out", "human", blosum)
 	bac_dict = process_blast(outdir+"/"+sample+".bacterial.blast.out", "bacterial", blosum)
 	vir_dict = process_blast(outdir+"/"+sample+".viral.blast.out", "viral", blosum)
+	
+	# Add NetMHCpan binding affinity data to blast dictionaries
+	hum_dict = add_affinities(hum_dict, args.netMHCpan, args.allele, args.outdir, args.sample, "human")
+	bac_dict = add_affinities(bac_dict, args.netMHCpan, args.allele, args.outdir, args.sample, "bacterial")
+	vir_dict = add_affinities(vir_dict, args.netMHCpan, args.allele, args.outdir, args.sample, "viral")
