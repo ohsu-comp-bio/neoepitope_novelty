@@ -11,7 +11,7 @@ def make_epitope_fasta(epitope_file, outputdir, name, fasta):
 	''' Produces fasta file containing all neoepitope sequences for a sample
 		
 		epitope_file: path to parsed output file from pVAC-Seq (or alternative program)
-		output_dir: path to directory in which to write fasta
+		outputdir: path to directory in which to write fasta
 		name: sample name to distinguish file (string)
 		fasta: path to output fasta file
 		
@@ -164,27 +164,22 @@ def process_blast(blast_results, type, matrix):
 	return blast_dict
 	
 	
-def add_affinities(dict, netMHCpan, allele, outputdir, name, type):
-	''' Adds MHC binding affinities for top blast result peptides to blast dictionary
+def add_affinities(dict, netMHCpan, allele, outputdir, name):
+	''' Adds MHC binding affinities for top human blast result peptides to human blast dictionary
 	
 		dict: blast results dictionary
 		netMHCpan: path to netMHCpan executable
 		allele: HLA allele
 		outputdir: path to output directory in which to write netMHCpan-associate files
 		name: sample name to distinguish file (string)
-		type: blast type - human, bacterial, or viral (string)
 		
 		Return value: dictionary
 	'''
 	# Obtain peptide sequences
-	mhc_peps = outputdir + "/" + name + "." + type + ".mhc.peps"
+	mhc_peps = outputdir + "/" + name + ".mhc.peps"
 	with open(mhc_peps, "w") as fh:
 	for key in dict:
-		if type == "human":
-			seq = dict[key][3]
-		else:
-			seq = dict[key][2]
-		fh.write(seq + "\n")
+		seq = dict[key][3]
 	
 	# Run netMHCpan
 	mhc_out = outputdir + "/" + name + "." + type + ".mhc.out"
@@ -202,10 +197,7 @@ def add_affinities(dict, netMHCpan, allele, outputdir, name, type):
 	
 	# Add affinities to dictionary
 	for key in dict:
-		if type == "human":
-			seq = dict[key][3]
-		else:
-			seq = dict[key][2]
+		seq = dict[key][3]
 		affinity = affinity_dict[seq]
 		dict[key].append(affinity)
 	
@@ -213,11 +205,28 @@ def add_affinities(dict, netMHCpan, allele, outputdir, name, type):
 
 
 def produce_annotations(epitope_file, human_dict, bacterial_dict, viral_dict, outputdir, name, allele):
+	''' Produces an annotation file for predicted neoepitopes
+		Contains data about relationship of neoepitope to paired normal peptide, closest human peptide from blast,
+			closest bacterial peptide from blast, and closest viral peptide from blast
+		
+		epitope_file: path to parsed output file from pVAC-Seq (or alternative program)
+		human_dict: dictionary containing human blast data
+		bacterial_dict: dictionary containing bacterial blast data
+		viral_dict: dictionary containing viral blast data
+		outputdir: path to directory in which to write output annotation file
+		name: sample name to distinguish file (string)
+		allele: HLA allele used for analysis
+		
+		Return value: none
+	'''
 	outfile = outputdir + "/" name + ".epitopes.annotated.tsv"
 	with open(outfile, "w") as out:
+		# Write header to outfile
 		out.write("Sample\tAllele\tNeoepitope\tNeoepitope_affinity\tPaired_normal_epitope\tPaired_normal_affinity\tTranscript\tGene\tPaired_BD\tPaired_PS\tBinding_stat\tMatch_transcript\tMatch_gene\tMatch_stat\tMatch_seq\tMatch_exact\tMatch_affinity\tMatch_BD\tMatch_PS\tBac_match\tBac_seq\tBac_exact\tBac_PS\tVir_match\tVir_seq\tVir_exact\tVir_PS\n")
+		# Loop through epitope file to obtain info
 		with open(epitope_file, "r") as fh"
 			for line in fh:
+				# Extract data from epitope file
 				line = line.strip("\n").split("\t")
     			peptide = line[2]
     			tum_bind = line[3]
@@ -226,6 +235,7 @@ def produce_annotations(epitope_file, human_dict, bacterial_dict, viral_dict, ou
     			transcript = line[6]
     			gene = line[7]
     			
+    			# Obtain data re: paired normal epitope
     			binding_difference = float(norm_bind) - float(tum_bind)
     			if float(norm_bind) > 500 and float(tum_bind) < 500 and float(norm_bind) >= 5*float(tum_bind):
         			stat = "novel"
@@ -234,6 +244,7 @@ def produce_annotations(epitope_file, human_dict, bacterial_dict, viral_dict, ou
     			tum_ps = float(score_pairwise(peptide, peptide, blosum))
     			peptide_similarity = float(score_pairwise(peptide, norm_pep, blosum))/tum_ps
     			
+    			# Obtain data re: closest human peptide from blast
     			if peptide in human_dict:
 					blast_match_trans = human_dict[peptide][1]
 					blast_match_gene = human_dict[peptide][2]
@@ -261,12 +272,39 @@ def produce_annotations(epitope_file, human_dict, bacterial_dict, viral_dict, ou
 					match_affinity = "NA"
 					match_bd = "NA"
         		
+        		# Obtain data re: closest bacterial peptide from blast
+        		if peptide in bacterial_dict:
+        			bac_match = bacterial_dict[peptide][1]
+        			bac_seq = bacterial_dict[peptide][2]
+        			if bac_seq == peptide:
+        				bac_exact = "exact"
+        			else:
+        				bac_exact = "inexact"
+        			bac_ps = bacterial_dict[peptide][3]/tum_ps
+        		else:
+        			bac_match = "NA"
+        			bac_seq = "NA"
+        			bac_exact = "NA"
+        			bac_ps = "NA"
+				
+				# Obtain data re: closest viral peptide from blast
+        		if peptide in viral_dict:
+        			vir_match = viral_dict[peptide][1]
+        			vir_seq = viral_dict[peptide][2]
+        			if vir_seq == peptide:
+        				vir_exact = "exact"
+        			else:
+        				vir_exact = "inexact"
+        			vir_ps = viral_dict[peptide][3]/tum_ps
+        		else:
+        			vir_match = "NA"
+        			vir_seq = "NA"
+        			vir_exact = "NA"
+        			vir_ps = "NA"
         		
-        		bac_score = bac_dict[peptide][0]
-        		bac_match = bac_dict[peptide][1]
-        		bac_seq = bac_dict[peptide][2]
-        		bac_ps = bac_dict[peptide][3]/tum_ps
-        		outline = [name, allele, peptide, tum_bind, norm_pep, norm_bind, transcript, gene, binding_difference, peptide_similarity, stat, blast_match_trans, blast_match_gene, match_stat, match_seq, match_exact, match_affinity, match_bd, match_ps]
+        		# Write data
+        		outline = "\t".join([name, allele, peptide, tum_bind, norm_pep, norm_bind, transcript, gene, binding_difference, peptide_similarity, stat, blast_match_trans, blast_match_gene, match_stat, match_seq, match_exact, match_affinity, match_bd, match_ps, bac_match, bac_seq, bac_exact, bac_ps, vir_match, vir_seq, vir_exact, vir_ps])
+				out.write(outline + "\n")
 	
 
 if __name__ == '__main__':
@@ -294,29 +332,42 @@ if __name__ == '__main__':
         )
     args = parser.parse_args()
     
+	print "Running annotate_neoepitopes.py for " + args.input + " with allele " + args.allele
+    
     # Set BLOSUM62 as blosum
     blosum = MatrixInfo.blosum62
     
-    # Sets paths to blast databases
+    # Set paths to blast databases
     humanDB = args.dbdir + "/humanPepDB"
     bacterialDB = args.dbdir + "/bacterialPepDB"
     viralDB = args.dbdir + "/viralPepDB"
     
+    print "Producing fasta file with neoepitope sequences for blast..."
+    
     # Produce fasta file containing neoepitopes
     fasta_path = outputdir + "/" + sample + ".epitopes.fasta"
     make_epitope_fasta(args.input, args.outdir, args.sample, fasta_path)
+    
+    print "Running blast now..."
 	
 	# Run blast comparing neoepitopes to human, bacterial, and viral peptides
 	run_blast(fasta_path, humanDB, args.blastp, args.outdir, args.sample, "human")
 	run_blast(fasta_path, bacterialDB, args.blastp, args.outdir, args.sample, "bacterial")
 	run_blast(fasta_path, viralDB, args.blastp, args.outdir, args.sample, "viral")
 	
+	print "Processing blast results..."
+	
 	# Process blast data and save to dictionaries
 	hum_dict = process_blast(outdir+"/"+sample+".human.blast.out", "human", blosum)
 	bac_dict = process_blast(outdir+"/"+sample+".bacterial.blast.out", "bacterial", blosum)
 	vir_dict = process_blast(outdir+"/"+sample+".viral.blast.out", "viral", blosum)
 	
+	print "Obtaining binding affinities for human blast peptides..."
+	
 	# Add NetMHCpan binding affinity data to blast dictionaries
-	hum_dict = add_affinities(hum_dict, args.netMHCpan, args.allele, args.outdir, args.sample, "human")
-	bac_dict = add_affinities(bac_dict, args.netMHCpan, args.allele, args.outdir, args.sample, "bacterial")
-	vir_dict = add_affinities(vir_dict, args.netMHCpan, args.allele, args.outdir, args.sample, "viral")
+	hum_dict = add_affinities(hum_dict, args.netMHCpan, args.allele, args.outdir, args.sample)
+	
+	print "Writing annotation file to " + args.outdir
+	
+	# Produce annotation file
+	produce_annotations(args.input, hum_dict, bac_dict, vir_dict, args.outdir, args.sample, args.allele)
