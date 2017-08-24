@@ -210,7 +210,64 @@ def add_affinities(dict, netMHCpan, allele, outputdir, name, type):
 		dict[key].append(affinity)
 	
 	return dict
-		
+
+
+def produce_annotations(epitope_file, human_dict, bacterial_dict, viral_dict, outputdir, name, allele):
+	outfile = outputdir + "/" name + ".epitopes.annotated.tsv"
+	with open(outfile, "w") as out:
+		out.write("Sample\tAllele\tNeoepitope\tNeoepitope_affinity\tPaired_normal_epitope\tPaired_normal_affinity\tTranscript\tGene\tPaired_BD\tPaired_PS\tBinding_stat\tMatch_transcript\tMatch_gene\tMatch_stat\tMatch_seq\tMatch_exact\tMatch_affinity\tMatch_BD\tMatch_PS\tBac_match\tBac_seq\tBac_exact\tBac_PS\tVir_match\tVir_seq\tVir_exact\tVir_PS\n")
+		with open(epitope_file, "r") as fh"
+			for line in fh:
+				line = line.strip("\n").split("\t")
+    			peptide = line[2]
+    			tum_bind = line[3]
+    			norm_pep = line[4]
+    			norm_bind = line[5]
+    			transcript = line[6]
+    			gene = line[7]
+    			
+    			binding_difference = float(norm_bind) - float(tum_bind)
+    			if float(norm_bind) > 500 and float(tum_bind) < 500 and float(norm_bind) >= 5*float(tum_bind):
+        			stat = "novel"
+    			else:
+        			stat = "nonnovel"
+    			tum_ps = float(score_pairwise(peptide, peptide, blosum))
+    			peptide_similarity = float(score_pairwise(peptide, norm_pep, blosum))/tum_ps
+    			
+    			if peptide in human_dict:
+					blast_match_trans = human_dict[peptide][1]
+					blast_match_gene = human_dict[peptide][2]
+					if transcript in blast_match_trans:
+						match_stat = "transcript_match"
+					elif gene in blast_match_gene:
+						match_stat = "gene_match"
+					else:
+						match_stat = "nonmatching"
+					match_seq = human_dict[peptide][3]
+					if match_seq == peptide:
+						match_exact = "exact"
+					else:
+						match_exact = "inexact"
+					match_ps = human_dict[peptide][4]/tum_ps
+					match_affinity = human_dict[peptide][5]
+					match_bd = match_affinity - tum_bind
+				else:
+					blast_match_trans = "NA"
+					blast_match_gene = "NA"
+					match_stat = "NA"
+					match_seq = "NA"
+					match_exact = "NA"
+					match_ps = "NA"
+					match_affinity = "NA"
+					match_bd = "NA"
+        		
+        		
+        		bac_score = bac_dict[peptide][0]
+        		bac_match = bac_dict[peptide][1]
+        		bac_seq = bac_dict[peptide][2]
+        		bac_ps = bac_dict[peptide][3]/tum_ps
+        		outline = [name, allele, peptide, tum_bind, norm_pep, norm_bind, transcript, gene, binding_difference, peptide_similarity, stat, blast_match_trans, blast_match_gene, match_stat, match_seq, match_exact, match_affinity, match_bd, match_ps]
+	
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
