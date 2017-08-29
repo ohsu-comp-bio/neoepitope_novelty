@@ -335,11 +335,6 @@ if __name__ == '__main__':
     # Set BLOSUM62 as blosum
     blosum = MatrixInfo.blosum62
     
-    # Set paths to blast databases
-    humanDB = args.dbdir + "/humanPepDB"
-    bacterialDB = args.dbdir + "/bacterialPepDB"
-    viralDB = args.dbdir + "/viralPepDB"
-    
     # Locate dictionary and blast database directories
     pickle_dir = os.path.dirname(__file__) + "/dictionaries/"
     blastdb_dir = os.path.dirname(__file__) + "/blast_dbs/"

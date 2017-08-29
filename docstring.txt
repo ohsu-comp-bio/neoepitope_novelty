@@ -10,11 +10,16 @@ Steps:
 
 2) Obtain and process required files:
 
-a) Download the gzipped blast protein database of bacterial peptides, available on figshare:
-*** LINK HERE ***
-Move the file into the neoepitope_novelty/blast_dbs/ directory and unzip
+a) Download and unzip Refseq's nonredundant bacterial peptide fasta set:
+ftp://ftp.ncbi.nlm.nih.gov/refseq/release/bacteria/bacteria.nonredundant_protein.*.protein.faa.gz
+Note: our code works for release #83
+Concatenate all the bacterial fasta files into one combined, bacterial peptide fasta file
 
-b) Download the pickled dictionary of bacterial peptides, bacterialDict.pickle, available on figshare:
+b) Run prepare_dbs.py from within the neoepitope_novelty/ directory to produce a blast protein database from the combined bacterial fasta file:
+	
+	python prepare_dbs.py -p <path to makeblastdb executable> -d blast_dbs/ -b <path to bacterial fasta>
+
+c) Download the pickled dictionary of bacterial peptides, bacterialDict.pickle, available on figshare:
 https://figshare.com/s/c1094f765bf874bfc4ac
 Move the dictionary file into the neoepitope_novelty/dictionaries/ directory
 
