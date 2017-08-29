@@ -225,7 +225,7 @@ def produce_annotations(epitope_file, human_dict, bacterial_dict, viral_dict, ou
 		# Write header to outfile
 		out.write("Sample\tAllele\tNeoepitope\tNeoepitope_affinity\tPaired_normal_epitope\tPaired_normal_affinity\tTranscript\tGene\tPaired_BD\tPaired_PS\tBinding_stat\tMatch_transcript\tMatch_gene\tMatch_stat\tMatch_seq\tMatch_exact\tMatch_affinity\tMatch_BD\tMatch_PS\tBac_match\tBac_seq\tBac_exact\tBac_PS\tVir_match\tVir_seq\tVir_exact\tVir_PS\n")
 		# Loop through epitope file to obtain info
-		with open(epitope_file, "r") as fh:
+		with open(epitope_file, "r") as fh"
 			for line in fh:
 				# Extract data from epitope file
 				line = line.strip("\n").split("\t")

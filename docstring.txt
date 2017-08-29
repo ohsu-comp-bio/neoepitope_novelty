@@ -23,5 +23,9 @@ ftp://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.*.protein.faa.gz
 Note: our code works for release #83
 Concatenate the viral fasta files into one combined, viral peptide fasta file
 
+d) Download the pickled dictionary of bacterial peptides, bacterialDict.pickle, available on figshare:
+https://figshare.com/s/c1094f765bf874bfc4ac
+Move the dictionary file into the neoepitope_novelty/dictionaries/ directory
 
-3) Run prepare_prereqs.py ONCE from within the main neoepitope_novelty directory
+
+3) Run prepare_prereqs.py ONCE:
