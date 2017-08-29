@@ -316,9 +316,6 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--outdir', type=str, required=True,
             help='path to output directory'
         )
-    parser.add_argument('-d', '--dbdir', type=str, required=True,
-            help='path to directory containing blastp databases'
-        )
     parser.add_argument('-s', '--sample', type=str, required=True,
             help='sample name'
         )
@@ -343,8 +340,14 @@ if __name__ == '__main__':
     bacterialDB = args.dbdir + "/bacterialPepDB"
     viralDB = args.dbdir + "/viralPepDB"
     
-    # Locate pickled dictionary directory
+    # Locate dictionary and blast database directories
     pickle_dir = os.path.dirname(__file__) + "/dictionaries/"
+    blastdb_dir = os.path.dirname(__file__) + "/blast_dbs/"
+    
+    # Set paths to blast databases
+    humanDB = blastdb_dir + "/humanPepDB"
+    bacterialDB = blastdb_dir + "/bacterialPepDB"
+    viralDB = blastdb_dir + "/viralPepDB"
     
     print '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()) + " Producing fasta file with neoepitope sequences for blast..."
     

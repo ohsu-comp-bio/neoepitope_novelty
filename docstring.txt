@@ -10,22 +10,14 @@ Steps:
 
 2) Obtain and process required files:
 
-a) Download and unzip Ensembl's human peptide fasta, release 88, available at:
-ftp://ftp.ensembl.org/pub/release-88/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz
+a) Download the gzipped blast protein database of bacterial peptides, available on figshare:
+*** LINK HERE ***
+Move the file into the neoepitope_novelty/blast_dbs/ directory and unzip
 
-b) Download and unzip Refseq's nonredundant bacterial peptide fasta set:
-ftp://ftp.ncbi.nlm.nih.gov/refseq/release/bacteria/bacteria.nonredundant_protein.*.protein.faa.gz
-Note: our code works for release #83
-Concatenate all the bacterial fasta files into one combined, bacterial peptide fasta file
-
-c) Download and unzip Refseq's viral peptide fasta set:
-ftp://ftp.ncbi.nlm.nih.gov/refseq/release/viral/viral.*.protein.faa.gz
-Note: our code works for release #83
-Concatenate the viral fasta files into one combined, viral peptide fasta file
-
-d) Download the pickled dictionary of bacterial peptides, bacterialDict.pickle, available on figshare:
+b) Download the pickled dictionary of bacterial peptides, bacterialDict.pickle, available on figshare:
 https://figshare.com/s/c1094f765bf874bfc4ac
 Move the dictionary file into the neoepitope_novelty/dictionaries/ directory
 
 
-3) Run prepare_prereqs.py ONCE:
+3) For each sample, run annotate_neoepitopes.py:
+*** INSTRUCTIONS ***
