@@ -24,5 +24,14 @@ https://figshare.com/s/c1094f765bf874bfc4ac
 Move the dictionary file into the neoepitope_novelty/dictionaries/ directory
 
 
-3) For each sample, run annotate_neoepitopes.py:
+3) For each sample and allele, run pVAC-Seq:
 *** INSTRUCTIONS ***
+
+
+5) For each run of pVAC-Seq, parse the results to produce a reduced results file:
+*** INSTRUCTIONS ***
+ 
+
+4) For each sample, run annotate_neoepitopes.py:
+*** INSTRUCTIONS ***
+python annotate_neoepitopes.py -i <
