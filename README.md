@@ -27,7 +27,7 @@ Note: our code works for release #83
 
 Concatenate all the bacterial fasta files into one combined, bacterial peptide fasta file
 
-b) Run prepare_dbs.py from within the neoepitope_novelty/ directory to produce a blast protein database from the combined bacterial fasta file:
+b) Run prepare_dbs.py from within the **neoepitope_novelty/** directory to produce a blast protein database from the combined bacterial fasta file:
 	
 `python prepare_dbs.py -m <makeblastdb path> -d blast_dbs/ -b <bacterial fasta>`
 
@@ -39,7 +39,7 @@ b) Run prepare_dbs.py from within the neoepitope_novelty/ directory to produce a
 c) Download the pickled dictionary of bacterial peptides, bacterialDict.pickle, available on figshare:
 https://figshare.com/s/c1094f765bf874bfc4ac
 
-Move the dictionary file into the neoepitope_novelty/dictionaries/ directory
+Move the dictionary file into the **neoepitope_novelty/dictionaries/** directory
 
 
 ## 3) For each sample and allele, run pVAC-Seq (v4.0.8) according to their recommendations:
@@ -81,7 +81,7 @@ Produce a tab-delimited file from your results with the following columns in thi
 - -n	path to netMHCpan executable
 
 
-Results will be in your chosen output directory under the name [SAMPLE NAME].epitopes.annotated.tsv
+Results will be in your chosen output directory under the name **[SAMPLE NAME].epitopes.annotated.tsv**
 
 
 ## 6) If you use these tools in analyses for your publication, please cite our manuscript:
