@@ -29,10 +29,16 @@ Concatenate all the bacterial fasta files into one combined, bacterial peptide f
 
 b) Run prepare_dbs.py from within the neoepitope_novelty/ directory to produce a blast protein database from the combined bacterial fasta file:
 	
-`python prepare_dbs.py -p <path to makeblastdb executable> -d blast_dbs/ -b <path to bacterial fasta>`
+`python prepare_dbs.py -m <makeblastdb path> -d blast_dbs/ -b <bacterial fasta>`
+
+- -p	path to makeblastdb executable
+- -d	path to directory in which write database
+- -b	path to bacterial peptide fasta (produced as in step 2a)
+
 
 c) Download the pickled dictionary of bacterial peptides, bacterialDict.pickle, available on figshare:
 https://figshare.com/s/c1094f765bf874bfc4ac
+
 Move the dictionary file into the neoepitope_novelty/dictionaries/ directory
 
 
@@ -51,35 +57,28 @@ If pVAC-Seq was run according to our recommendations above, you can use parse_pv
 
 `python parse_pvac.py -i <input file> -o <output file> -s <sample name>`
 
--i input file, the path to the results from running pVAC-Seq with the recommended settings
-
--o output file, the desired path to write results to
-
--s sample name to distinguish run
+- -i input file, the path to the results from running pVAC-Seq with the recommended settings
+- -o output file, the desired path to write results to
+- -s sample name to distinguish run
 
 
 If you chose to use different parameters for running pVAC-Seq, or used a different program, that's fine too!
 You'll just need to parse the results independently.
 Produce a tab-delimited file from your results with the following columns in this order and no header:
 
-`<allele> <neoepitope sequence> <neoepitope binding affinity> <normal epitope sequence> <normal epitope binding affinity> <transcript> <gene>
+`<allele> <neoepitope sequence> <neoepitope binding affinity> <normal epitope sequence> <normal epitope binding affinity> <transcript> <gene>`
  
 
 ## 5) For each sample, run annotate_neoepitopes.py:
 
 `python annotate_neoepitopes.py -i <input file> -o <output directory> -s <sample name> -a <allele> -p <blastp path> -n <netMHCpan path>`
 
--i	input file to program, the path to the result of parsing a pVAC-Seq results file with parse_pvac.py
-
--o	path to output directory to which output files will be written
-
--s	sample name to distinguish run
-
--a	HLA allele to use for analysis (format example: HLA-A02:01)
-
--p	path to blastp+ executable
-
--n	path to netMHCpan executable
+- -i	input file to program, the path to the result of parsing a pVAC-Seq results file with parse_pvac.py
+- -o	path to output directory to which output files will be written
+- -s	sample name to distinguish run
+- -a	HLA allele to use for analysis (format example: HLA-A02:01)
+- -p	path to blastp+ executable
+- -n	path to netMHCpan executable
 
 
 Results will be in your chosen output directory under the name [SAMPLE NAME].epitopes.annotated.tsv
