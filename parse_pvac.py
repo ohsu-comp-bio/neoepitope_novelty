@@ -2,6 +2,7 @@
 
 
 import argparse
+import datetime
 
 
 def parse_pvac(pvac, output):
@@ -39,6 +40,10 @@ if __name__ == '__main__':
         )
     args = parser.parse_args()
     
+    
+    print '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()) + " Beginning parse for " + args.infile
+    
     # Parse pVAC-Seq results
     parse_pvac(args.infile, args.outfile)
     
+    print '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()) + " Complete! Output is " + args.outfile

@@ -1,8 +1,8 @@
 # Neoepitope novelty
 
 These tools provide annotation of neoepitope predictions to allow for insights into the level of novelty of a neoepitope.
-We provide metrics regarding novelty of MHC binding and of peptide sequence relative to human, bacterial, and viral peptides.
-Our manuscript in NAME/LINK demonstrates the utility of investigating these metrics for predicting immunogenic peptides.
+We produce metrics regarding novelty of MHC binding and of peptide sequence relative to human, bacterial, and viral peptides.
+Our manuscript in **LOCATION/LINK NEEDED HERE** demonstrates the utility of these metrics for predicting immunogenicity of neoepitopes.
 
 # Steps for use:
 
@@ -64,7 +64,7 @@ If pVAC-Seq was run according to our recommendations above, you can use parse_pv
 
 If you chose to use different parameters for running pVAC-Seq, or used a different program, that's fine too!
 You'll just need to parse the results independently.
-Produce a tab-delimited file from your results with the following columns in this order and no header:
+Produce a tab-delimited file from your results with no header and with the following columns in this order:
 
 `<allele> <neoepitope sequence> <neoepitope binding affinity> <normal epitope sequence> <normal epitope binding affinity> <transcript> <gene>`
  
@@ -85,4 +85,4 @@ Results will be in your chosen output directory under the name **[SAMPLE NAME].e
 
 
 ## 6) If you use these tools in analyses for your publication, please cite our manuscript:
-CITATION HERE
+**CITATION NEEDED HERE**
