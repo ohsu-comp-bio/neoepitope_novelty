@@ -33,4 +33,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     # Create human, bacterial, and viral blast databases	
-    makeBlastpDB(args.blast, args.bacterialFasta, args.dbdir, "bacterialPepDB")
+    makeBlastpDB(args.blast, args.bacterialFasta, args.dbdir, "bacterial_peptide_db")

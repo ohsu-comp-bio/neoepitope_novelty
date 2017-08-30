@@ -23,9 +23,9 @@ def make_epitope_fasta(epitope_file, outputdir, name, fasta):
 	with open(epitope_file, "r") as fh:
 		for line in fh:
 			line = line.split("\t")
-    		epitope = line[1]
-    		if epitope not in epitope_list:
-    			epitope_list.append(epitope)
+			epitope = line[1]
+			if epitope not in epitope_list:
+				epitope_list.append(epitope)
     
     # Write unique epitopes to fasta file
 	with open(fasta, "w") as fh:
@@ -46,7 +46,10 @@ def run_blast(fasta, db, blastp, outputdir, name, type):
 		No return value
 	'''
 	outfile = outputdir + "/" + name + "." + type + ".blast.out"
-	subprocess.call([blastp, "-outfmt", "6 qseqid sseqid length qstart qend sseq evalue", "-db", db, "-query", fasta, "-matrix", "BLOSUM62", "-evalue", "200000", "-ungapped", "-comp_based_stats", "F", "-out", outfile])
+	if os.path.isfile(outfile) == False:
+		subprocess.call([blastp, "-outfmt", "6 qseqid sseqid length qstart qend sseq evalue", "-db", db, "-query", fasta, "-matrix", "BLOSUM62", "-evalue", "200000", "-ungapped", "-comp_based_stats", "F", "-out", outfile])
+	else:
+		print "Blast file for " + type + " peptides already exists - skipping"
 
 
 def score_match(pair, matrix):
@@ -107,27 +110,27 @@ def process_blast(blast_results, type, matrix, dict_dir):
 		for line in fh:
 		    
 		    # Obtain relevant data
-		    line = line.strip("\n").split("\t")
-    		epitope = line[0].split("=")[1]
-    		length = int(line[2])
-    		eval = float(line[6])
-    		match_pep = line[1]
-    		if type == "human":
-    			match_transcript = dict[match_pep][1]
-    			match_gene = dict[match_pep][0]
-    		else:
-    			match_species = dict[match_pep]
-    		match_seq = line[5]
+			line = line.strip("\n").split("\t")
+			epitope = line[0].split("=")[1]
+			length = int(line[2])
+			eval = float(line[6])
+			match_pep = line[1].replace("ref", "").replace("|", "")
+			if type == "human":
+				match_transcript = dict[match_pep][1]
+				match_gene = dict[match_pep][0]
+			else:
+				match_species = dict[match_pep]
+			match_seq = line[5]
     		
-    		# Check for presence of invalid characters in match seq
-    		invalids = ["B", "J", "O", "U", "X", "Z", "*"]
-    		invalid_matches = []
-    		for char in invalids:
-        		if char in match_seq:
+			# Check for presence of invalid characters in match seq
+			invalids = ["B", "J", "O", "U", "X", "Z", "*"]
+			invalid_matches = []
+			for char in invalids:
+				if char in match_seq:
 					invalid_matches.append(char)
 			
 			# If epitope is not already in dictionary, add it
-			if epitope not in blast_dict and length == len(epitope) and invalid == []:
+			if epitope not in blast_dict and length == len(epitope) and invalid_matches == []:
 				match_ps = score_pairwise(epitope, match_seq, matrix)
 				if type == "human":
 					blast_dict[epitope] = [eval, match_transcript, match_gene, match_seq, match_ps]
@@ -154,13 +157,13 @@ def process_blast(blast_results, type, matrix, dict_dir):
 						match_ps = score_pairwise(epitope, match_seq, matrix)
 						if match_seq == epitope or match_ps > blast_dict[epitope][4]:
 							blast_dict[epitope] = [eval, match_transcript, match_gene, match_seq, match_ps]
-			else:
-				if match_seq == blast_dict[epitope][2] and match_species not in blast_dict[epitope][1]:
-					blast_dict[epitope][1] = blast_dict[epitope][1] + "," + match_species
 				else:
-					match_ps = score_pairwise(epitope, match_seq, blosum)
-					if match_seq == epitope or match_ps > blast_dict[epitope][3]:
-						blast_dict[epitope] = [eval, match_species, match_seq, match_ps]
+					if match_seq == blast_dict[epitope][2] and match_species not in blast_dict[epitope][1]:
+						blast_dict[epitope][1] = blast_dict[epitope][1] + "," + match_species
+					else:
+						match_ps = score_pairwise(epitope, match_seq, blosum)
+						if match_seq == epitope or match_ps > blast_dict[epitope][3]:
+							blast_dict[epitope] = [eval, match_species, match_seq, match_ps]
 	
 	return blast_dict
 	
@@ -181,9 +184,10 @@ def add_affinities(dict, netMHCpan, allele, outputdir, name):
 	with open(mhc_peps, "w") as fh:
 		for key in dict:
 			seq = dict[key][3]
+			fh.write(seq + "\n")
 	
 	# Run netMHCpan
-	mhc_out = outputdir + "/" + name + "." + type + ".mhc.out"
+	mhc_out = outputdir + "/" + name + ".mhc.out"
 	subprocess.call([netMHCpan, "-a", allele, "-inptype", "1", "-p", "-xls", "-xlsfile", mhc_out, mhc_peps])
 	
 	# Process netMHCpan results
@@ -192,7 +196,7 @@ def add_affinities(dict, netMHCpan, allele, outputdir, name):
 		for line in fh:
 			if line[0] == "0":
 				line = line.strip("\n").split("\t")
-				pep = line[2]
+				pep = line[1]
 				nM = line[5]
 				affinity_dict[pep] = nM
 	
@@ -229,24 +233,29 @@ def produce_annotations(epitope_file, human_dict, bacterial_dict, viral_dict, ou
 			for line in fh:
 				# Extract data from epitope file
 				line = line.strip("\n").split("\t")
-    			peptide = line[1]
-    			tum_bind = line[2]
-    			norm_pep = line[3]
-    			norm_bind = line[4]
-    			transcript = line[5]
-    			gene = line[7]
+				peptide = line[1]
+				tum_bind = line[2]
+				norm_pep = line[3]
+				norm_bind = line[4]
+				transcript = line[5]
+				gene = line[6]
     			
-    			# Obtain data re: paired normal epitope
-    			binding_difference = float(norm_bind) - float(tum_bind)
-    			if float(norm_bind) > 500 and float(tum_bind) < 500 and float(norm_bind) >= 5*float(tum_bind):
-        			stat = "novel"
-    			else:
-        			stat = "nonnovel"
-    			tum_ps = float(score_pairwise(peptide, peptide, blosum))
-    			peptide_similarity = float(score_pairwise(peptide, norm_pep, blosum))/tum_ps
+				tum_ps = float(score_pairwise(peptide, peptide, blosum))
+				if norm_pep != "NA":
+					# Obtain data re: paired normal epitope
+					binding_difference = float(norm_bind) - float(tum_bind)
+					if float(norm_bind) > 500 and float(tum_bind) < 500 and float(norm_bind) >= 5*float(tum_bind):
+						stat = "novel"
+					else:
+						stat = "nonnovel"
+					peptide_similarity = float(score_pairwise(peptide, norm_pep, blosum))/tum_ps
+				else:
+					binding_difference = "NA"
+					stat = "NA"
+					peptide_similarity = "NA"
     			
     			# Obtain data re: closest human peptide from blast
-				if peptide in human_dict:
+    			if peptide in human_dict:
 					blast_match_trans = human_dict[peptide][1]
 					blast_match_gene = human_dict[peptide][2]
 					if transcript in blast_match_trans:
@@ -255,14 +264,14 @@ def produce_annotations(epitope_file, human_dict, bacterial_dict, viral_dict, ou
 						match_stat = "gene_match"
 					else:
 						match_stat = "nonmatching"
-					match_seq = human_dict[peptide][3]
+						match_seq = human_dict[peptide][3]
 					if match_seq == peptide:
 						match_exact = "exact"
 					else:
 						match_exact = "inexact"
 					match_ps = human_dict[peptide][4]/tum_ps
 					match_affinity = human_dict[peptide][5]
-					match_bd = match_affinity - tum_bind
+					match_bd = float(match_affinity) - float(tum_bind)
 				else:
 					blast_match_trans = "NA"
 					blast_match_gene = "NA"
@@ -274,37 +283,37 @@ def produce_annotations(epitope_file, human_dict, bacterial_dict, viral_dict, ou
 					match_bd = "NA"
         		
         		# Obtain data re: closest bacterial peptide from blast
-        		if peptide in bacterial_dict:
-        			bac_match = bacterial_dict[peptide][1]
-        			bac_seq = bacterial_dict[peptide][2]
-        			if bac_seq == peptide:
-        				bac_exact = "exact"
-        			else:
-        				bac_exact = "inexact"
-        			bac_ps = bacterial_dict[peptide][3]/tum_ps
-        		else:
-        			bac_match = "NA"
-        			bac_seq = "NA"
-        			bac_exact = "NA"
-        			bac_ps = "NA"
+				if peptide in bacterial_dict:
+					bac_match = bacterial_dict[peptide][1]
+					bac_seq = bacterial_dict[peptide][2]
+					if bac_seq == peptide:
+						bac_exact = "exact"
+					else:
+						bac_exact = "inexact"
+					bac_ps = bacterial_dict[peptide][3]/tum_ps
+				else:
+					bac_match = "NA"
+					bac_seq = "NA"
+					bac_exact = "NA"
+					bac_ps = "NA"
 				
 				# Obtain data re: closest viral peptide from blast
-        		if peptide in viral_dict:
-        			vir_match = viral_dict[peptide][1]
-        			vir_seq = viral_dict[peptide][2]
-        			if vir_seq == peptide:
-        				vir_exact = "exact"
-        			else:
-        				vir_exact = "inexact"
-        			vir_ps = viral_dict[peptide][3]/tum_ps
-        		else:
-        			vir_match = "NA"
-        			vir_seq = "NA"
-        			vir_exact = "NA"
-        			vir_ps = "NA"
+				if peptide in viral_dict:
+					vir_match = viral_dict[peptide][1]
+					vir_seq = viral_dict[peptide][2]
+					if vir_seq == peptide:
+						vir_exact = "exact"
+					else:
+						vir_exact = "inexact"
+					vir_ps = viral_dict[peptide][3]/tum_ps
+				else:
+					vir_match = "NA"
+					vir_seq = "NA"
+					vir_exact = "NA"
+					vir_ps = "NA"
         		
-        		# Write data
-        		outline = "\t".join([allele, peptide, tum_bind, norm_pep, norm_bind, transcript, gene, binding_difference, peptide_similarity, stat, blast_match_trans, blast_match_gene, match_stat, match_seq, match_exact, match_affinity, match_bd, match_ps, bac_match, bac_seq, bac_exact, bac_ps, vir_match, vir_seq, vir_exact, vir_ps])
+				# Write data
+				outline = "\t".join([allele, peptide, str(tum_bind), norm_pep, str(norm_bind), transcript, gene, str(binding_difference), str(peptide_similarity), stat, blast_match_trans, blast_match_gene, match_stat, match_seq, match_exact, str(match_affinity), str(match_bd), str(match_ps), bac_match, bac_seq, bac_exact, str(bac_ps), vir_match, vir_seq, vir_exact, str(vir_ps)])
 				out.write(outline + "\n")
 	
 
@@ -340,14 +349,14 @@ if __name__ == '__main__':
     blastdb_dir = os.path.dirname(__file__) + "/blast_dbs/"
     
     # Set paths to blast databases
-    humanDB = blastdb_dir + "/humanPepDB"
-    bacterialDB = blastdb_dir + "/bacterialPepDB"
-    viralDB = blastdb_dir + "/viralPepDB"
+    humanDB = blastdb_dir + "/hg38_peptide_db"
+    bacterialDB = blastdb_dir + "/bacterial_peptide_db"
+    viralDB = blastdb_dir + "/new_viral_pep_db"
     
     print '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()) + " Producing fasta file with neoepitope sequences for blast..."
     
     # Produce fasta file containing neoepitopes
-    fasta_path = outputdir + "/" + sample + ".epitopes.fasta"
+    fasta_path = args.outdir + "/" + args.sample + ".epitopes.fasta"
     make_epitope_fasta(args.input, args.outdir, args.sample, fasta_path)
     
     print '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()) + " Running blast now..."
@@ -360,9 +369,9 @@ if __name__ == '__main__':
 	print '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()) + " Processing blast results..."
 	
 	# Process blast data and save to dictionaries
-	hum_dict = process_blast(outdir+"/"+sample+".human.blast.out", "human", blosum, pickle_dir)
-	bac_dict = process_blast(outdir+"/"+sample+".bacterial.blast.out", "bacterial", blosum, pickle_dir)
-	vir_dict = process_blast(outdir+"/"+sample+".viral.blast.out", "viral", blosum, pickle_dir)
+	hum_dict = process_blast(args.outdir+"/"+args.sample+".human.blast.out", "human", blosum, pickle_dir)
+	bac_dict = process_blast(args.outdir+"/"+args.sample+".bacterial.blast.out", "bacterial", blosum, pickle_dir)
+	vir_dict = process_blast(args.outdir+"/"+args.sample+".viral.blast.out", "viral", blosum, pickle_dir)
 	
 	print '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()) + " Obtaining binding affinities for human blast peptides..."
 	
