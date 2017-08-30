@@ -23,7 +23,7 @@ def make_epitope_fasta(epitope_file, outputdir, name, fasta):
 	with open(epitope_file, "r") as fh:
 		for line in fh:
 			line = line.split("\t")
-    		epitope = line[2]
+    		epitope = line[1]
     		if epitope not in epitope_list:
     			epitope_list.append(epitope)
     
@@ -229,11 +229,11 @@ def produce_annotations(epitope_file, human_dict, bacterial_dict, viral_dict, ou
 			for line in fh:
 				# Extract data from epitope file
 				line = line.strip("\n").split("\t")
-    			peptide = line[2]
-    			tum_bind = line[3]
-    			norm_pep = line[4]
-    			norm_bind = line[5]
-    			transcript = line[6]
+    			peptide = line[1]
+    			tum_bind = line[2]
+    			norm_pep = line[3]
+    			norm_bind = line[4]
+    			transcript = line[5]
     			gene = line[7]
     			
     			# Obtain data re: paired normal epitope
@@ -304,7 +304,7 @@ def produce_annotations(epitope_file, human_dict, bacterial_dict, viral_dict, ou
         			vir_ps = "NA"
         		
         		# Write data
-        		outline = "\t".join([name, allele, peptide, tum_bind, norm_pep, norm_bind, transcript, gene, binding_difference, peptide_similarity, stat, blast_match_trans, blast_match_gene, match_stat, match_seq, match_exact, match_affinity, match_bd, match_ps, bac_match, bac_seq, bac_exact, bac_ps, vir_match, vir_seq, vir_exact, vir_ps])
+        		outline = "\t".join([allele, peptide, tum_bind, norm_pep, norm_bind, transcript, gene, binding_difference, peptide_similarity, stat, blast_match_trans, blast_match_gene, match_stat, match_seq, match_exact, match_affinity, match_bd, match_ps, bac_match, bac_seq, bac_exact, bac_ps, vir_match, vir_seq, vir_exact, vir_ps])
 				out.write(outline + "\n")
 	
 
