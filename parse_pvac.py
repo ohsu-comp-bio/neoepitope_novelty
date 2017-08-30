@@ -4,7 +4,7 @@
 import argparse
 
 
-def parse_pvac(pvac, output, name):'
+def parse_pvac(pvac, output, name):
 	''' Parses output of pVAC-seq to obtain relevant data for annotating neoepitopes
 		
 		pvac: path to results file from pVAC-seq

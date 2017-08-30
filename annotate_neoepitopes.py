@@ -28,7 +28,7 @@ def make_epitope_fasta(epitope_file, outputdir, name, fasta):
     			epitope_list.append(epitope)
     
     # Write unique epitopes to fasta file
-    with open(fasta, "w") as fh:
+	with open(fasta, "w") as fh:
     	for epitope in epitope_list:
     		fh.write("> seq="+ epitope + "\n")
     		fh.write(epitope + "\n")
@@ -57,10 +57,10 @@ def score_match(pair, matrix):
 		
 		Return value: score
 	''' 
-    if pair not in matrix:
-        return matrix[(tuple(reversed(pair)))]
-    else:
-        return matrix[pair]                                                                                                            
+	if pair not in matrix:
+    	return matrix[(tuple(reversed(pair)))]
+	else:
+		return matrix[pair]                                                                                                            
 
 
 def score_pairwise(seq1, seq2, matrix):
@@ -72,13 +72,13 @@ def score_pairwise(seq1, seq2, matrix):
 		
 		Return value: score
 	''' 
-    score = 0
-    last_ep = len(seq1) - 1
-    for i in range(len(seq1)):
-        if i != 1 and i != last_ep:
-            pair = (seq1[i], seq2[i])
-            score += score_match(pair, matrix)
-    return score
+	score = 0
+	last_ep = len(seq1) - 1
+	for i in range(len(seq1)):
+		if i != 1 and i != last_ep:
+			pair = (seq1[i], seq2[i])
+			score += score_match(pair, matrix)
+	return score
     
 def process_blast(blast_results, type, matrix, dict_dir):
 	''' Processes results of blastp to obtain dictionary of best results
@@ -124,7 +124,7 @@ def process_blast(blast_results, type, matrix, dict_dir):
     		invalid_matches = []
     		for char in invalids:
         		if char in match_seq:
-            		invalid_matches.append(char)
+					invalid_matches.append(char)
 			
 			# If epitope is not already in dictionary, add it
 			if epitope not in blast_dict and length == len(epitope) and invalid == []:
@@ -148,19 +148,19 @@ def process_blast(blast_results, type, matrix, dict_dir):
 			elif epitope in blast_dict and length == len(epitope) and eval == blast_dict[epitope][0] and invalid_matches == []:
 				if type == "human":
 					if match_seq == blast_dict[epitope][3] and match_transcript not in blast_dict[epitope][1] and match_gene not in blast_dict[epitope][2]:
-            			blast_dict[epitope][1] = blast_dict[epitope][1] + "," + match_transcript
-            			blast_dict[epitope][2] = blast_dict[epitope][2] + "," + match_gene
-            		else:
-            			match_ps = score_pairwise(epitope, match_seq, matrix)
-            			if match_seq == epitope or match_ps > blast_dict[epitope][4]:
-                			blast_dict[epitope] = [eval, match_transcript, match_gene, match_seq, match_ps]
+						blast_dict[epitope][1] = blast_dict[epitope][1] + "," + match_transcript
+						blast_dict[epitope][2] = blast_dict[epitope][2] + "," + match_gene
+					else:
+						match_ps = score_pairwise(epitope, match_seq, matrix)
+						if match_seq == epitope or match_ps > blast_dict[epitope][4]:
+							blast_dict[epitope] = [eval, match_transcript, match_gene, match_seq, match_ps]
+			else:
+				if match_seq == blast_dict[epitope][2] and match_species not in blast_dict[epitope][1]:
+					blast_dict[epitope][1] = blast_dict[epitope][1] + "," + match_species
 				else:
-					if match_seq == blast_dict[epitope][2] and match_species not in blast_dict[epitope][1]:
-            			blast_dict[epitope][1] = blast_dict[epitope][1] + "," + match_species
-        			else:
-           				match_ps = score_pairwise(epitope, match_seq, blosum)
-            			if match_seq == epitope or match_ps > blast_dict[epitope][3]:
-                		blast_dict[epitope] = [eval, match_species, match_seq, match_ps]
+					match_ps = score_pairwise(epitope, match_seq, blosum)
+					if match_seq == epitope or match_ps > blast_dict[epitope][3]:
+						blast_dict[epitope] = [eval, match_species, match_seq, match_ps]
 	
 	return blast_dict
 	
@@ -179,8 +179,8 @@ def add_affinities(dict, netMHCpan, allele, outputdir, name):
 	# Obtain peptide sequences
 	mhc_peps = outputdir + "/" + name + ".mhc.peps"
 	with open(mhc_peps, "w") as fh:
-	for key in dict:
-		seq = dict[key][3]
+		for key in dict:
+			seq = dict[key][3]
 	
 	# Run netMHCpan
 	mhc_out = outputdir + "/" + name + "." + type + ".mhc.out"
@@ -220,7 +220,7 @@ def produce_annotations(epitope_file, human_dict, bacterial_dict, viral_dict, ou
 		
 		Return value: none
 	'''
-	outfile = outputdir + "/" name + ".epitopes.annotated.tsv"
+	outfile = outputdir + "/" + name + ".epitopes.annotated.tsv"
 	with open(outfile, "w") as out:
 		# Write header to outfile
 		out.write("Sample\tAllele\tNeoepitope\tNeoepitope_affinity\tPaired_normal_epitope\tPaired_normal_affinity\tTranscript\tGene\tPaired_BD\tPaired_PS\tBinding_stat\tMatch_transcript\tMatch_gene\tMatch_stat\tMatch_seq\tMatch_exact\tMatch_affinity\tMatch_BD\tMatch_PS\tBac_match\tBac_seq\tBac_exact\tBac_PS\tVir_match\tVir_seq\tVir_exact\tVir_PS\n")
@@ -246,7 +246,7 @@ def produce_annotations(epitope_file, human_dict, bacterial_dict, viral_dict, ou
     			peptide_similarity = float(score_pairwise(peptide, norm_pep, blosum))/tum_ps
     			
     			# Obtain data re: closest human peptide from blast
-    			if peptide in human_dict:
+				if peptide in human_dict:
 					blast_match_trans = human_dict[peptide][1]
 					blast_match_gene = human_dict[peptide][2]
 					if transcript in blast_match_trans:
@@ -374,4 +374,4 @@ if __name__ == '__main__':
 	# Produce annotation file
 	produce_annotations(args.input, hum_dict, bac_dict, vir_dict, args.outdir, args.sample, args.allele)
 	
-	print '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()) + " Complete! Annotation file is " + args.outdir + "/" args.sample + ".epitopes.annotated.tsv"
+	print '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()) + " Complete! Annotation file is " + args.outdir + "/" + args.sample + ".epitopes.annotated.tsv"
