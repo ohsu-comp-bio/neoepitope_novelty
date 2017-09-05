@@ -1,3 +1,48 @@
+########################## Melanoma Cohort ##########################
+
+### Load data ###
+setwd("/Users/wooma/Documents/Hugo_data/")
+
+Hugo_Pt11 <- read.table("Hugo_Pt11.complete.tsv", sep="\t", header=T)
+Hugo_Pt11$Response <- rep("No_response", length(Hugo_Pt11$Sample))
+Hugo_Pt12 <- read.table("Hugo_Pt12.complete.tsv", sep="\t", header=T)
+Hugo_Pt12$Response <- rep("No_response", length(Hugo_Pt12$Sample))
+Hugo_Pt13 <- read.table("Hugo_Pt13.complete.tsv", sep="\t", header=T)
+Hugo_Pt13$Response <- rep("Response", length(Hugo_Pt13$Sample))
+Hugo_Pt14 <- read.table("Hugo_Pt14.complete.tsv", sep="\t", header=T)
+Hugo_Pt14$Response <- rep("No_response", length(Hugo_Pt14$Sample))
+Hugo_Pt15 <- read.table("Hugo_Pt15.complete.tsv", sep="\t", header=T)
+Hugo_Pt15$Response <- rep("Response", length(Hugo_Pt15$Sample))
+Hugo_Pt16 <- read.table("Hugo_Pt16.complete.tsv", sep="\t", header=T)
+Hugo_Pt16$Response <- rep("No_response", length(Hugo_Pt16$Sample))
+Hugo_Pt17 <- read.table("Hugo_Pt17.complete.tsv", sep="\t", header=T)
+Hugo_Pt17$Response <- rep("No_response", length(Hugo_Pt17$Sample))
+Hugo_Pt18 <- read.table("Hugo_Pt18.complete.tsv", sep="\t", header=T)
+Hugo_Pt18$Response <- rep("Response", length(Hugo_Pt18$Sample))
+Hugo_Pt19 <- read.table("Hugo_Pt19.complete.tsv", sep="\t", header=T)
+Hugo_Pt19$Response <- rep("Response", length(Hugo_Pt19$Sample))
+Hugo_Pt20 <- read.table("Hugo_Pt20.complete.tsv", sep="\t", header=T)
+Hugo_Pt20$Response <- rep("No_response", length(Hugo_Pt20$Sample))
+Hugo_Pt21 <- read.table("Hugo_Pt21.complete.tsv", sep="\t", header=T)
+Hugo_Pt21$Response <- rep("Response", length(Hugo_Pt21$Sample))
+Hugo_Pt22 <- read.table("Hugo_Pt22.complete.tsv", sep="\t", header=T)
+Hugo_Pt22$Response <- rep("No_response", length(Hugo_Pt22$Sample))
+Hugo <- rbind(Hugo_Pt11, Hugo_Pt12, Hugo_Pt13, Hugo_Pt14, Hugo_Pt15, Hugo_Pt16, Hugo_Pt17, Hugo_Pt18, Hugo_Pt19, Hugo_Pt20, Hugo_Pt21, Hugo_Pt22)
+Hugo$Stat <- "nonimmunogenic"
+Hugo$Stat[Hugo$Tumor_affinity < 500 & Hugo$Normal_affinity > 500 & Hugo$Normal_affinity >= (5*Hugo$Tumor_affinity)] <- "immunogenic"
+
+### Stats ###
+
+median(Hugo$Binding_difference)
+
+immuno_counts <- as.data.frame(table(Hugo$Sample[Hugo$Stat == "immunogenic"]))
+all_counts <- as.data.frame(table(Hugo$Sample))
+mean(immuno_counts$Freq/all_counts$Freq)
+sd(immuno_counts$Freq/all_counts$Freq)
+
+
+########################## TCGA data ##########################
+
 ### Load data ###
 
 setwd("/Users/wooma/Documents/TCGA_data_analysis/")
@@ -833,3 +878,130 @@ t.test(bac_mismatches, norm_mismatches)
 t.test(bac_mismatches, blast_mismatches)
 
 better_bac_species <- rev(sort(table(bac_better$Bac_match)))
+
+
+########################## Validation Cohort ##########################
+
+### Load data ###
+
+setwd("/Users/wooma/Documents/Ott_data/")
+
+Ott <- read.table("Ott.complete.tsv", sep="\t", header=T, quote = "\"")
+Ott_response <- read.table("Ott_response.txt", sep="\t", header=T)
+Ott <- cbind(Ott, Ott_response)
+adjust_response <- rep("NA", length(Ott$X1))
+for (i in 1:length(Ott$X1)){
+  this_res <- Ott$X1[i]
+  if (this_res == 1) {
+    adjust_response[i] <- "response"
+  } else if (this_res == 0){
+    adjust_response[i] <- "nonresponse"
+  }
+}
+Ott$Adj_res <- adjust_response
+Ott <- Ott[Ott$Adj_res != "NA",]
+Ott$X1 <- NULL
+Ott$Response <- Ott$Adj_res
+Ott$Adj_res <- NULL
+
+Carreno <- read.table("Carreno.complete.tsv", sep="\t", header=T, quote = "\"")
+Carreno_response <- read.table("Carreno_response.txt", sep="\t", header=T)
+Carreno <- cbind(Carreno, Carreno_response)
+
+mupexi <- read.table("mupexi.complete.tsv", sep="\t", header=T, quote = "\"")
+mupexi_response <- read.table("mupexi.response.txt", sep="\t", header=T)
+mupexi <- cbind(mupexi, mupexi_response)
+for (i in 1:length(mupexi$Response)){
+  if (mupexi$Response[i] == "FALSE"){
+    mupexi$Response[i] <- "nonresponse"
+  } else {
+    mupexi$Response[i] <- "response"
+  }
+}
+
+le <- read.table("Le.complete.tsv", sep="\t", header=T, quote = "\"")
+le_response <- read.table("Le.response.txt", sep="\t", header=T)
+le <- cbind(le, le_response)
+
+tran <- read.table("Tran.complete.tsv", sep="\t", header=T, quote = "\"")
+tran_response <- read.table("Tran.response.txt", sep="\t", header=T)
+tran <- cbind(tran, tran_response)
+
+gros <- read.table("Gros.complete.tsv", sep="\t", header=T, quote = "\"")
+gros_response <- read.table("Gros.response.txt", sep="\t", header=T)
+gros <- cbind(gros, gros_response)
+
+OttCarr <- rbind(Ott, Carreno, mupexi, le, tran, gros)
+
+binary_responses <- read.table("binary_response.txt", sep="\t", header=T)
+binary_stat <- read.table("binary_stat.txt", sep="\t", header=T)
+OttCarr <- cbind(OttCarr, binary_responses, binary_stat)
+OttCarr$Fold_change <- OttCarr$Normal_affinity/OttCarr$Tumor_affinity
+
+### Modeling ###
+
+# Novel/non-novel binding status
+library(pROC)
+roc(OttCarr$Binary_response, OttCarr$Binary_stat)
+
+# All
+roc(response=OttCarr$Binary_response, predictor=OttCarr$Tumor_affinity*OttCarr$Fold_change*OttCarr$BLOSUM*OttCarr$Vir_PS*OttCarr$Bac_PS*OttCarr$Match_PS*OttCarr$Match_BD*OttCarr$Num_mismatches)
+all_lm <- lm(OttCarr$Binary_response~OttCarr$Tumor_affinity+OttCarr$Binding_difference+OttCarr$BLOSUM+OttCarr$Vir_PS+OttCarr$Bac_PS+OttCarr$Match_PS+OttCarr$Match_BD+OttCarr$Binary_stat+OttCarr$Num_mismatches)
+summary(all_lm)
+
+# Reduced
+roc(response=OttCarr$Binary_response, predictor=OttCarr$Tumor_affinity*OttCarr$Vir_PS*OttCarr$Match_BD*OttCarr$Num_mismatches)
+reduced_lm <- lm(OttCarr$Binary_response~OttCarr$Tumor_affinity+OttCarr$Vir_PS+OttCarr$Match_BD+OttCarr$Num_mismatches)
+summary(reduced_lm)
+
+# Single factors
+
+# Tumor epitope binding
+wilcox.test(OttCarr$Tumor_affinity~OttCarr$Response)
+TumBind_fit <- lm(OttCarr$Binary_response~OttCarr$Tumor_affinity)
+summary(TumBind_fit)
+
+# Normal epitope binding
+wilcox.test(OttCarr$Normal_affinity~OttCarr$Response)
+NormBind_fit <- lm(OttCarr$Binary_response~OttCarr$Normal_affinity)
+summary(NormBind_fit)
+
+# Binding difference
+wilcox.test(OttCarr$Binding_difference~OttCarr$Response)
+BD_fit <- lm(OttCarr$Binary_response~OttCarr$Binding_difference)
+summary(BD_fit)
+
+# Binding fold change
+wilcox.test(OttCarr$Fold_change~OttCarr$Response)
+FC_fit <- lm(OttCarr$Binary_response~OttCarr$Fold_change)
+summary(FC_fit)
+
+# Human blast match binding difference
+wilcox.test(OttCarr$Match_BD~OttCarr$Response)
+blastBD_fit <- lm(OttCarr$Binary_response~OttCarr$Match_BD)
+summary(blastBD_fit)
+
+# Paired normal protein similarity
+wilcox.test(OttCarr$BLOSUM~OttCarr$Response)
+PS_fit <- lm(OttCarr$Binary_response~OttCarr$BLOSUM)
+summary(PS_fit)
+
+# Paired normal mismatch number
+wilcox.test(OttCarr$Num_mismatches~OttCarr$Response)
+Mismatch_fit <- lm(OttCarr$Binary_response~OttCarr$Num_mismatches)
+summary(Mismatch_fit)
+
+# Human blast match protein similarity
+wilcox.test(OttCarr$Match_PS~OttCarr$Response)
+Blast_fit <- lm(OttCarr$Binary_response~OttCarr$Match_PS)
+summary(Blast_fit)
+
+# Bacterial blast match protein similarity
+wilcox.test(OttCarr$Bac_PS~OttCarr$Response)
+Bac_fit <- lm(OttCarr$Binary_response~OttCarr$Bac_PS)
+summary(Bac_fit)
+
+# Viral blast match protein similarity
+wilcox.test(OttCarr$Vir_PS~OttCarr$Response)
+Vir_fit <- lm(OttCarr$Binary_response~OttCarr$Vir_PS)
+summary(Vir_fit)
