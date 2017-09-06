@@ -27,11 +27,11 @@ def make_epitope_fasta(epitope_file, outputdir, name, fasta):
 			if epitope not in epitope_list:
 				epitope_list.append(epitope)
     
-    # Write unique epitopes to fasta file
+	# Write unique epitopes to fasta file
 	with open(fasta, "w") as fh:
-    	for epitope in epitope_list:
-    		fh.write("> seq="+ epitope + "\n")
-    		fh.write(epitope + "\n")
+		for epitope in epitope_list:
+			fh.write("> seq="+ epitope + "\n")
+			fh.write(epitope + "\n")
 
     
 def run_blast(fasta, db, blastp, outputdir, name, type):
@@ -53,7 +53,7 @@ def run_blast(fasta, db, blastp, outputdir, name, type):
 
 
 def score_match(pair, matrix):
-	''' Gives a score from a matrix for a given pair
+	''' Gives a score from a matrix for a given pair of sequences
 	
 		pair: pair to score (tuple)
 		matrix: scoring matrix (matrix)
