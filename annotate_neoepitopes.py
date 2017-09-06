@@ -318,48 +318,48 @@ def produce_annotations(epitope_file, human_dict, bacterial_dict, viral_dict, ou
 	
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--input', type=str, required=True,
+	parser = argparse.ArgumentParser()
+	parser.add_argument('-i', '--input', type=str, required=True,
             help='path input epitope data tsv file'
         )
-    parser.add_argument('-o', '--outdir', type=str, required=True,
+	parser.add_argument('-o', '--outdir', type=str, required=True,
             help='path to output directory'
         )
-    parser.add_argument('-s', '--sample', type=str, required=True,
+	parser.add_argument('-s', '--sample', type=str, required=True,
             help='sample name'
         )
-    parser.add_argument('-a', '--allele', type=str, required=True,
+	parser.add_argument('-a', '--allele', type=str, required=True,
             help='HLA allele (format HLA-A02:01)'
         )
-    parser.add_argument('-p', '--blastp', type=str, required=True,
+	parser.add_argument('-p', '--blastp', type=str, required=True,
             help='path to blastp executable'
         )
-    parser.add_argument('-n', '--netMHCpan', type=str, required=True,
+	parser.add_argument('-n', '--netMHCpan', type=str, required=True,
             help='path to netMHCpan executable'
         )
-    args = parser.parse_args()
+	args = parser.parse_args()
     
 	print 'Timestamp: {:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()) + " Running annotate_neoepitopes.py for " + args.input + " with allele " + args.allele
     
-    # Set BLOSUM62 as blosum
-    blosum = MatrixInfo.blosum62
+	# Set BLOSUM62 as blosum
+	blosum = MatrixInfo.blosum62
     
-    # Locate dictionary and blast database directories
-    pickle_dir = os.path.dirname(__file__) + "/dictionaries/"
-    blastdb_dir = os.path.dirname(__file__) + "/blast_dbs/"
+	# Locate dictionary and blast database directories
+	pickle_dir = os.path.dirname(__file__) + "/dictionaries/"
+	blastdb_dir = os.path.dirname(__file__) + "/blast_dbs/"
     
-    # Set paths to blast databases
-    humanDB = blastdb_dir + "/hg38_peptide_db"
-    bacterialDB = blastdb_dir + "/bacterial_peptide_db"
-    viralDB = blastdb_dir + "/new_viral_pep_db"
+	# Set paths to blast databases
+	humanDB = blastdb_dir + "/hg38_peptide_db"
+	bacterialDB = blastdb_dir + "/bacterial_peptide_db"
+	viralDB = blastdb_dir + "/new_viral_pep_db"
     
-    print '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()) + " Producing fasta file with neoepitope sequences for blast..."
+	print '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()) + " Producing fasta file with neoepitope sequences for blast..."
     
-    # Produce fasta file containing neoepitopes
-    fasta_path = args.outdir + "/" + args.sample + ".epitopes.fasta"
-    make_epitope_fasta(args.input, args.outdir, args.sample, fasta_path)
+	# Produce fasta file containing neoepitopes
+	fasta_path = args.outdir + "/" + args.sample + ".epitopes.fasta"
+	make_epitope_fasta(args.input, args.outdir, args.sample, fasta_path)
     
-    print '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()) + " Running blast now..."
+	print '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()) + " Running blast now..."
 	
 	# Run blast comparing neoepitopes to human, bacterial, and viral peptides
 	run_blast(fasta_path, humanDB, args.blastp, args.outdir, args.sample, "human")
