@@ -644,13 +644,6 @@ mean(ep_means)
 immunogenic_overlap$Total <- immunogenic_overlap$One + immunogenic_overlap$Two + immunogenic_overlap$Three + immunogenic_overlap$Four + immunogenic_overlap$Five + immunogenic_overlap$Six
 
 mean(immunogenic_overlap$Total)
-mean(immunogenic_overlap$One/immunogenic_overlap$Total)
-mean(immunogenic_overlap$Two/immunogenic_overlap$Total)
-mean(immunogenic_overlap$Three/immunogenic_overlap$Total)
-mean(immunogenic_overlap$Four/immunogenic_overlap$Total)
-mean(immunogenic_overlap$Five/immunogenic_overlap$Total)
-mean(immunogenic_overlap$Six/immunogenic_overlap$Total)
-max(immunogenic_overlap$Six/immunogenic_overlap$Total)
 
 immunogenic_overlap$Prp_one <- 100*immunogenic_overlap$One/immunogenic_overlap$Total
 immunogenic_overlap$Prp_two <- 100*immunogenic_overlap$Two/immunogenic_overlap$Total
@@ -658,6 +651,10 @@ immunogenic_overlap$Prp_three <- 100*immunogenic_overlap$Three/immunogenic_overl
 immunogenic_overlap$Prp_four <- 100*immunogenic_overlap$Four/immunogenic_overlap$Total
 immunogenic_overlap$Prp_five <- 100*immunogenic_overlap$Five/immunogenic_overlap$Total
 immunogenic_overlap$Prp_six <- 100*immunogenic_overlap$Six/immunogenic_overlap$Total
+
+mean(immunogenic_overlap$Prp_two)
+mean(immunogenic_overlap$Prp_six)
+max(immunogenic_overlap$Prp_six)
 
 
 ### Binding difference ###
