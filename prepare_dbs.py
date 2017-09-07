@@ -15,6 +15,7 @@ def makeBlastpDB(makeblastdb, fasta, outputdir, title):
 		
 		No return value
 	'''
+	# Run makeblastdb to produce blast protein database
 	subprocess.call([makeblastdb, "-in", fasta, "-input_type", "fasta", "-dbtype", "prot", 
 					"-title", outputdir+"/"+title, "-out", outputdir+"/"+title])
 					

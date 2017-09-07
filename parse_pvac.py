@@ -18,6 +18,7 @@ def parse_pvac(pvac, output):
 		with open(pvac, "r") as fh:
 			for line in fh:
 				line = line.strip("\n").split("\t")
+				# If line isn't header, extract transcript, gene, HLA allele, and neoepitope and paired normal epitope sequences and affinitys
 				if line[0] != "Chromosome":
 					transcript = line[5]
 					gene = line[6]
@@ -26,6 +27,7 @@ def parse_pvac(pvac, output):
 					normal_epitope = line[16]
 					normal_bind = line[32]
 					tumor_bind = line[33]
+					# Write data out to tsv file
 					outline = "\t".join([allele, neoepitope, tumor_bind, normal_epitope, normal_bind, transcript, gene])
 					out.write(outline + "\n")
 					

@@ -18,7 +18,7 @@ def make_epitope_fasta(epitope_file, outputdir, name, fasta):
 		
 		No return value
 	'''
-	# Obtain all unique epitopes
+	# Obtain all unique epitopes and store as a list
 	epitope_list = []
 	with open(epitope_file, "r") as fh:
 		for line in fh:
@@ -27,7 +27,7 @@ def make_epitope_fasta(epitope_file, outputdir, name, fasta):
 			if epitope not in epitope_list:
 				epitope_list.append(epitope)
     
-	# Write unique epitopes to fasta file
+	# Write unique epitopes from list to fasta file
 	with open(fasta, "w") as fh:
 		for epitope in epitope_list:
 			fh.write("> seq="+ epitope + "\n")
@@ -46,8 +46,10 @@ def run_blast(fasta, db, blastp, outputdir, name, type):
 		No return value
 	'''
 	outfile = outputdir + "/" + name + "." + type + ".blast.out"
+	# If blast output does not already exist, run blast to obtain it
 	if os.path.isfile(outfile) == False:
 		subprocess.call([blastp, "-outfmt", "6 qseqid sseqid length qstart qend sseq evalue", "-db", db, "-query", fasta, "-matrix", "BLOSUM62", "-evalue", "200000", "-ungapped", "-comp_based_stats", "F", "-out", outfile])
+	# If blast output already exits, skip running blast
 	else:
 		print "Blast file for " + type + " peptides already exists - skipping"
 
@@ -60,8 +62,10 @@ def score_match(pair, matrix):
 		
 		Return value: score
 	''' 
+	# If the pair is not in the matrix, reverse it and get score
 	if pair not in matrix:
     	return matrix[(tuple(reversed(pair)))]
+	# If the pair is in the matrix, get score
 	else:
 		return matrix[pair]                                                                                                            
 
@@ -77,6 +81,7 @@ def score_pairwise(seq1, seq2, matrix):
 	''' 
 	score = 0
 	last_ep = len(seq1) - 1
+	# Add score to running total for all non-anchor positions
 	for i in range(len(seq1)):
 		if i != 1 and i != last_ep:
 			pair = (seq1[i], seq2[i])
@@ -96,7 +101,7 @@ def process_blast(blast_results, type, matrix, dict_dir):
 	
 		Return value: dictionary
 	'''
-	# Set peptide dictionary
+	# Set peptide dictionary based on peptide type
 	if type == "human":
 		dict = pickle.load(open(dict_dir+"humanDict.pickle", "rb"))
 	elif type == "bacterial":
@@ -109,18 +114,20 @@ def process_blast(blast_results, type, matrix, dict_dir):
 	with open(blast_results, "r") as fh:
 		for line in fh:
 		    
-		    # Obtain relevant data
+		    # Obtain relevant data - epitope sequence, alignment length, E value, matching sequence, peptide name
 			line = line.strip("\n").split("\t")
 			epitope = line[0].split("=")[1]
 			length = int(line[2])
 			eval = float(line[6])
+			match_seq = line[5]
 			match_pep = line[1].replace("ref", "").replace("|", "")
+			# If working with human peptides, obtain match transcript and match gene from dictionary
 			if type == "human":
 				match_transcript = dict[match_pep][1]
 				match_gene = dict[match_pep][0]
+			# If working with bacterial or viral peptides, obtain the match species
 			else:
 				match_species = dict[match_pep]
-			match_seq = line[5]
     		
 			# Check for presence of invalid characters in match seq
 			invalids = ["B", "J", "O", "U", "X", "Z", "*"]
@@ -129,8 +136,9 @@ def process_blast(blast_results, type, matrix, dict_dir):
 				if char in match_seq:
 					invalid_matches.append(char)
 			
-			# If epitope is not already in dictionary, add it
+			# Check f epitope is not already in dictionary, the alignment is the right length, and there are no invalid characters
 			if epitope not in blast_dict and length == len(epitope) and invalid_matches == []:
+				# Find BLOSUM score between neoepitope and peptide match, then store data
 				match_ps = score_pairwise(epitope, match_seq, matrix)
 				if type == "human":
 					blast_dict[epitope] = [eval, match_transcript, match_gene, match_seq, match_ps]
@@ -139,6 +147,7 @@ def process_blast(blast_results, type, matrix, dict_dir):
 			
 			# If epitope is in dictionary, but E value for this entry is better, replace data
 			elif epitope in blast_dict and length == len(epitope) and eval < blast_dict[epitope][0] and invalid_matches == []:		
+				# Find BLOSUM score between neoepitope and peptide match, then store data
 				match_ps = score_pairwise(epitope, match_seq, matrix)
 				if type == "human":
 					blast_dict[epitope] = [eval, match_transcript, match_gene, match_seq, match_ps]
@@ -179,18 +188,18 @@ def add_affinities(dict, netMHCpan, allele, outputdir, name):
 		
 		Return value: dictionary
 	'''
-	# Obtain peptide sequences
+	# Obtain sequences for peptide matches to neoepitopes
 	mhc_peps = outputdir + "/" + name + ".mhc.peps"
 	with open(mhc_peps, "w") as fh:
 		for key in dict:
 			seq = dict[key][3]
 			fh.write(seq + "\n")
 	
-	# Run netMHCpan
+	# Run netMHCpan to obtain binding affinities for the peptides
 	mhc_out = outputdir + "/" + name + ".mhc.out"
 	subprocess.call([netMHCpan, "-a", allele, "-inptype", "1", "-p", "-xls", "-xlsfile", mhc_out, mhc_peps])
 	
-	# Process netMHCpan results
+	# Process netMHCpan results to obtain affinities
 	affinity_dict = {}
 	with open(mhc_out, "r") as fh:
 		for line in fh:
@@ -200,7 +209,7 @@ def add_affinities(dict, netMHCpan, allele, outputdir, name):
 				nM = line[5]
 				affinity_dict[pep] = nM
 	
-	# Add affinities to dictionary
+	# Add affinities to blast results dictionary
 	for key in dict:
 		seq = dict[key][3]
 		affinity = affinity_dict[seq]
@@ -231,7 +240,7 @@ def produce_annotations(epitope_file, human_dict, bacterial_dict, viral_dict, ou
 		# Loop through epitope file to obtain info
 		with open(epitope_file, "r") as fh:
 			for line in fh:
-				# Extract data from epitope file
+				# Extract data from epitope file - neoepitope and paired normal epitope sequences and MHC affinities, transcript, gene
 				line = line.strip("\n").split("\t")
 				peptide = line[1]
 				tum_bind = line[2]
@@ -240,15 +249,18 @@ def produce_annotations(epitope_file, human_dict, bacterial_dict, viral_dict, ou
 				transcript = line[5]
 				gene = line[6]
     			
+    			# Obtain BLOSUM score for neoepitope scored against itself for subsequent score normalization
 				tum_ps = float(score_pairwise(peptide, peptide, blosum))
+				
+				# Obtain data for paired normal epitope - binding affinity difference and normalized protein similarity score
 				if norm_pep != "NA":
-					# Obtain data re: paired normal epitope
 					binding_difference = float(norm_bind) - float(tum_bind)
 					if float(norm_bind) > 500 and float(tum_bind) < 500 and float(norm_bind) >= 5*float(tum_bind):
 						stat = "novel"
 					else:
 						stat = "nonnovel"
 					peptide_similarity = float(score_pairwise(peptide, norm_pep, blosum))/tum_ps
+				# If neoepitope has no paired normal, NAs are stored
 				else:
 					binding_difference = "NA"
 					stat = "NA"
@@ -256,8 +268,10 @@ def produce_annotations(epitope_file, human_dict, bacterial_dict, viral_dict, ou
     			
     			# Obtain data re: closest human peptide from blast
     			if peptide in human_dict:
+					# Obtain gene and transcript names
 					blast_match_trans = human_dict[peptide][1]
 					blast_match_gene = human_dict[peptide][2]
+					# Check whether match peptide is from same transcript, gene, or neither
 					if transcript in blast_match_trans:
 						match_stat = "transcript_match"
 					elif gene in blast_match_gene:
@@ -265,13 +279,16 @@ def produce_annotations(epitope_file, human_dict, bacterial_dict, viral_dict, ou
 					else:
 						match_stat = "nonmatching"
 						match_seq = human_dict[peptide][3]
+					# Check if the match peptide is the exact same sequence as neoepitope
 					if match_seq == peptide:
 						match_exact = "exact"
 					else:
 						match_exact = "inexact"
+					# Obtain normalized protein similarity, binding affinity and binding difference
 					match_ps = human_dict[peptide][4]/tum_ps
 					match_affinity = human_dict[peptide][5]
 					match_bd = float(match_affinity) - float(tum_bind)
+				# If neoepitope has no blast match, NAs are stored
 				else:
 					blast_match_trans = "NA"
 					blast_match_gene = "NA"
@@ -284,13 +301,17 @@ def produce_annotations(epitope_file, human_dict, bacterial_dict, viral_dict, ou
         		
         		# Obtain data re: closest bacterial peptide from blast
 				if peptide in bacterial_dict:
+					# Obtain species and sequence
 					bac_match = bacterial_dict[peptide][1]
 					bac_seq = bacterial_dict[peptide][2]
+					# Check if the match peptide is the exact same sequence as neoepitope
 					if bac_seq == peptide:
 						bac_exact = "exact"
 					else:
 						bac_exact = "inexact"
+					# Obtain normalized protein similarity
 					bac_ps = bacterial_dict[peptide][3]/tum_ps
+				# If neoepitope has no bacterial blast match, NAs are stored
 				else:
 					bac_match = "NA"
 					bac_seq = "NA"
@@ -299,20 +320,24 @@ def produce_annotations(epitope_file, human_dict, bacterial_dict, viral_dict, ou
 				
 				# Obtain data re: closest viral peptide from blast
 				if peptide in viral_dict:
+					# Obtain species and sequence
 					vir_match = viral_dict[peptide][1]
 					vir_seq = viral_dict[peptide][2]
+					# Check if the match peptide is the exact same sequence as neoepitope
 					if vir_seq == peptide:
 						vir_exact = "exact"
 					else:
 						vir_exact = "inexact"
+					# Obtain normalized protein similarity
 					vir_ps = viral_dict[peptide][3]/tum_ps
+				# If neoepitope has no viral blast match, NAs are stored
 				else:
 					vir_match = "NA"
 					vir_seq = "NA"
 					vir_exact = "NA"
 					vir_ps = "NA"
         		
-				# Write data
+				# Write data out to tsv file
 				outline = "\t".join([allele, peptide, str(tum_bind), norm_pep, str(norm_bind), transcript, gene, str(binding_difference), str(peptide_similarity), stat, blast_match_trans, blast_match_gene, match_stat, match_seq, match_exact, str(match_affinity), str(match_bd), str(match_ps), bac_match, bac_seq, bac_exact, str(bac_ps), vir_match, vir_seq, vir_exact, str(vir_ps)])
 				out.write(outline + "\n")
 	
