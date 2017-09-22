@@ -85,3 +85,5 @@ Results will be in your chosen output directory under the name **[SAMPLE NAME].e
 
 
 ## 6) If you use these tools in analyses for your publication, please cite our manuscript:
+
+Wood MA, Paralkar M, Paralkar MP, Nguyen A, Struck AJ, Ellrott K, Margolin A, Nellore A, Thompson RF. Population-level distribution and putative immunogenicity of cancer neoepitopes. Preprint in [BioRxiv](https://www.biorxiv.org/content/early/2017/09/22/192716).
