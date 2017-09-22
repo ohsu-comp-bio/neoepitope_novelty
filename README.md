@@ -2,7 +2,7 @@
 
 These tools provide annotation of neoepitope predictions to allow for insights into the level of novelty of a neoepitope.
 We produce metrics regarding novelty of MHC binding and of peptide sequence relative to human, bacterial, and viral peptides.
-Our manuscript in BioRxiv demonstrates the utility of these metrics for predicting immunogenicity of neoepitopes.
+Our manuscript in [BioRxiv](https://www.biorxiv.org/content/early/2017/09/22/192716) demonstrates the utility of these metrics for predicting immunogenicity of neoepitopes.
 
 # Steps for use:
 
