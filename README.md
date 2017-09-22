@@ -85,4 +85,3 @@ Results will be in your chosen output directory under the name **[SAMPLE NAME].e
 
 
 ## 6) If you use these tools in analyses for your publication, please cite our manuscript:
-**CITATION NEEDED HERE**
