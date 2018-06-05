@@ -2,7 +2,7 @@
 
 These tools provide annotation of neoepitope predictions to allow for insights into the level of novelty of a neoepitope.
 We produce metrics regarding novelty of MHC binding and of peptide sequence relative to human, bacterial, and viral peptides.
-Our manuscript in [BioRxiv](https://www.biorxiv.org/content/early/2017/09/22/192716) demonstrates the utility of these metrics for predicting immunogenicity of neoepitopes.
+Our manuscript in [BMC Cancer](https://bmccancer.biomedcentral.com/articles/10.1186/s12885-018-4325-6) demonstrates the utility of these metrics for predicting immunogenicity of neoepitopes.
 
 # Steps for use:
 
@@ -86,4 +86,4 @@ Results will be in your chosen output directory under the name **[SAMPLE NAME].e
 
 ## 6) If you use these tools in analyses for your publication, please cite our manuscript:
 
-Wood MA, Paralkar M, Paralkar MP, Nguyen A, Struck AJ, Ellrott K, Margolin A, Nellore A, Thompson RF. Population-level distribution and putative immunogenicity of cancer neoepitopes. Preprint in [BioRxiv](https://www.biorxiv.org/content/early/2017/09/22/192716).
+Wood MA, Paralkar M, Paralkar MP, Nguyen A, Struck AJ, Ellrott K, Margolin A, Nellore A, Thompson RF. (2018) Population-level distribution and putative immunogenicity of cancer neoepitopes. _[BMC Cancer]_(https://bmccancer.biomedcentral.com/articles/10.1186/s12885-018-4325-6), _18_, 414.
