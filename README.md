@@ -84,6 +84,6 @@ Produce a tab-delimited file from your results with no header and with the follo
 Results will be in your chosen output directory under the name **[SAMPLE NAME].epitopes.annotated.tsv**
 
 
-## 6) If you use these tools in analyses for your publication, please cite our manuscript:
+## 6) If you use these tools in analyses for your publication, please cite our [manuscript](https://bmccancer.biomedcentral.com/articles/10.1186/s12885-018-4325-6):
 
-Wood MA, Paralkar M, Paralkar MP, Nguyen A, Struck AJ, Ellrott K, Margolin A, Nellore A, Thompson RF. (2018) Population-level distribution and putative immunogenicity of cancer neoepitopes. _[BMC Cancer]_(https://bmccancer.biomedcentral.com/articles/10.1186/s12885-018-4325-6), _18_, 414.
+Wood MA, Paralkar M, Paralkar MP, Nguyen A, Struck AJ, Ellrott K, Margolin A, Nellore A, Thompson RF. (2018) Population-level distribution and putative immunogenicity of cancer neoepitopes. _BMC Cancer_, _18_, 414.
