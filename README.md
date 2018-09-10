@@ -37,7 +37,7 @@ b) Run prepare_dbs.py from within the **neoepitope_novelty/** directory to produ
 
 
 c) Download the pickled dictionary of bacterial peptides, bacterialDict.pickle, available on figshare:
-https://figshare.com/s/c1094f765bf874bfc4ac
+https://figshare.com/articles/Peptide_ID_to_species_of_origin_dictionary/5345323
 
 Move the dictionary file into the **neoepitope_novelty/dictionaries/** directory
 
